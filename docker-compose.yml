@@ -5,11 +5,8 @@ services:
       context: ./client
     ports:
       - "3000:3000"
-    # Другие настройки фронтэнда
-
   server:
     build:
       context: ./server
     ports:
       - "8080:8080"
-    # Другие настройки бэкэнда
