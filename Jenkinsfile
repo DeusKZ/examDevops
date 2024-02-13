@@ -1,53 +1,38 @@
 pipeline {
     agent any
-    
+
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build Frontend') {
-            steps {
-                dir('client') {
-                    script {
-                        sh 'docker build -t frontend .'
-                    }
-                }
-            }
-        }
-
-        stage('Build Backend') {
-            steps {
-                dir('server') {
-                    script {
-                        sh 'docker build -t backend .'
-                    }
-                }
-            }
-        }
-
-        stage('Publish Locally') {
+        stage('Checkout Repository') {
             steps {
                 script {
-                    sh 'docker-compose up -d'
+                    git 'https://github.com/DeusKZ/examDevops.git'
                 }
             }
         }
-    }
 
-    post {
-        always {
-            script {
-                sh 'docker-compose down'
+        stage('Build and Run Docker Container') {
+            steps {
+                script {
+                       docker build -t examDevops:latest .
+                       docker run -d --examDevops -p 8080:8080 devops:latest
+                }
             }
         }
-        success {
-            echo 'Deployment successful!'
+
+        stage('Check if Docker Container is Running') {
+            steps {
+                script {
+                       docker ps | grep examDevops
+                }
+            }
         }
-        failure {
-            echo 'Deployment failed!'
+
+        stage('Stop Docker Container') {
+            steps {
+                script {
+                       docker stop examDevops
+                }
+            }
         }
     }
 }
